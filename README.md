@@ -1,4 +1,5 @@
 # Adversarial Disentanglement by Backpropagation with Physics-Informed Variational Autoencoder
+[![DOI](https://zenodo.org/badge/1003050965.svg)](https://zenodo.org/badge/latestdoi/1003050965)
 
 This repository contains the code accompanying the paper: "Adversarial Disentanglement by Backpropagation with Physics-Informed Variational Autoencoder".
 The pre-print version can be found here: https://arxiv.org/abs/2506.13658.
@@ -48,9 +49,10 @@ Each case study is located in its own subdirectory under `cases/`. These subdire
 - Each script contains a `case` variable to select the case study.
 - The `0_single_run` and `1_disentanglement_metric` scripts additionally contain a `preset` variable to specify the model preset.
 - Multiple model presets can be specified per case study in its `__init__.py` file.
+- Each model preset must specify the model type to use. `P` corresponds to a model with separate encoders for each modality. `S` specifies a model with a single encoder.
 - The `utils/__init__.py` file contains global default parameters, which are partially overwritten by the presets defined in each case study.
 - The `dpivae.py` module provides functions for model setup, training, and evaluation, which are used by the main scripts.
-- Regularization methods not used in the paper (e.g. adjusting $\alpha$ and $\beta$, constraining the neural network output magnitude and gradient clipping) have not been tested.
+- Regularization methods not used in the paper (e.g. adjusting $\alpha$ and $\beta$, constraining the neural network output magnitude and gradient clipping) have not been fully tested and should be used with caution.
 
 ## References
 The simulators used to generate data for the case studies are as follows:

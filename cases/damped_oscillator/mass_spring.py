@@ -30,7 +30,7 @@ def mass_spring(z, t):
 
 def mass_spring_dashpot(input, dt=0.01, Nt=100):
     """
-    Script to generate synthetic data for the damped oscillator case study.
+    Function to generate synthetic data for the damped oscillator case study.
     Can include an external sinusoidal forcing term which is not used in the
     case study presented in the paper.
 

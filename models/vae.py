@@ -151,12 +151,6 @@ class DPIVAE(pl.LightningModule):
         return zx, zc, zy, dens_z
 
     def decode(self, zx, zc, zy):
-        """
-        Notes:
-            * For classification problems the `decoder_y` is expected to return an array
-                of shape `(N_mc, N_batch, N_o, N_c)` containing logits, where `N_o` is the number of outputs
-                and `N_c` is the number of classes (assumed equal across outputs for now)
-        """
         xh_p, xh_d = self.decoder_x(zx, torch.cat((zc, zy), dim=-1))
         yh, log_sigma_y = self.decoder_y(zy)
         ch, log_sigma_c = self.decoder_c(zc)

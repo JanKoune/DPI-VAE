@@ -10,59 +10,6 @@ from utils import device
 from torch.autograd import Function
 
 
-def get_transform_from_prior(prior):
-    """
-    TODO:
-        * Currently, parameters can either be hard-bounded or plausible-bounded. This
-        function should be adjusted to deal with the case where a parameter can be both
-
-    :param prior:
-    :return:
-    """
-    params_bounded = {
-        key: idx
-        for idx, key in enumerate(prior.keys())
-        if ((prior[key]["lb"] != None) and (prior[key]["ub"] != None))
-    }
-    params_unbounded = {
-        key: idx
-        for idx, key in enumerate(prior.keys())
-        if ((prior[key]["lb"] == None) and (prior[key]["ub"] == None))
-    }
-
-    # Hard bounds
-    lb = torch.tensor([prior[key]["lb"] for key in params_bounded.keys()])
-    ub = torch.tensor([prior[key]["ub"] for key in params_bounded.keys()])
-
-    # Plausible bounds
-    plb = torch.tensor([prior[key]["plb"] for key in params_unbounded.keys()])
-    pub = torch.tensor([prior[key]["pub"] for key in params_unbounded.keys()])
-
-    # Bounded and unbounded indices
-    idx_bounded = torch.tensor(list(params_bounded.values()))
-    idx_unbounded = torch.tensor(list(params_unbounded.values()))
-
-    # Transform
-    shift_scale_bounded = ShiftScale(lb, ub)
-    logistic_bounded = Logistic(alpha=0.01)
-    box_bounded = BoxTransform(-torch.ones(len(idx_bounded)), torch.ones(len(idx_bounded)))
-
-    list_transforms = []
-    if len(idx_bounded) > 0:
-        list_transforms.append(
-            ChainTransformMasked(box_bounded, logistic_bounded, shift_scale_bounded, mask=idx_bounded)
-        )
-
-    if len(idx_unbounded) > 0:
-        list_transforms.append(BoxTransform(plb, pub, mask=idx_unbounded))
-
-    # TODO: Better error checking
-    if len(list_transforms) == 0:
-        raise ValueError("List of transforms is empty")
-
-    return ChainTransformMasked(*list_transforms)
-
-
 class Transform(ABC):
     """
     Abstract base class for the transforms. Derived classes must
@@ -153,38 +100,8 @@ class ShiftScale(Transform):
         return z, log_det
 
     def _inverse(self, z):
-        # TODO: Check that the log-det is correct
         z = z / self.a - self.b / self.a
         log_det = -torch.log(self.a).sum() * torch.ones(z.shape[:-1]).to(device)
-        return z, log_det
-
-
-class BoxTransform(Transform):
-    """Standardize coordinates with respect to a specified box.
-
-    Args:
-        lb (FloatTensor): 1D tensor of lower bounds
-        ub (FloatTensor): 1D tensor of upper bounds
-
-    See: L. Acerbi - Variational Bayes Monte Carlo
-    """
-
-    def __init__(self, lb, ub, **kwargs):
-        super().__init__(**kwargs)
-        self.lb = lb
-        self.ub = ub
-        self.a = self.ub - self.lb
-        self.b = (self.lb + self.ub) / 2
-
-    def _forward(self, z):
-        z = z * self.a + self.b
-        log_det = torch.log(self.a).sum() * torch.ones(z.shape[-2])
-        return z, log_det
-
-    def _inverse(self, z):
-        # TODO: Check that the log-det is correct
-        z = z / self.a - self.b / self.a
-        log_det = -torch.log(self.a).sum() * torch.ones(z.shape[-2])
         return z, log_det
 
 
@@ -199,41 +116,20 @@ class Logistic(Transform):
     """
 
     def __init__(self, k=1, **kwargs):
-        """Constructor
-
-        Args:
-          alpha: Alpha parameter, see above
-        """
         super().__init__(**kwargs)
         self.sigmoid = nn.Sigmoid()
         self.softplus = nn.Softplus()
         self.k = k
 
     def _forward(self, z):
-        """
-        Logit transform
-
-        :param z:
-        :return:
-        """
         log_det = self.jld_forward(z, self.k).sum(dim=-1)
         return self.sigmoid(self.k * z), log_det
 
     def _inverse(self, z):
-        """
-        Logistic transform
-
-        :param z:
-        :return:
-        """
-        # raise NotImplementedError("Inverse not implemented for this transform")
+        raise NotImplementedError("Inverse not implemented for this transform")
 
     @staticmethod
     def jld_forward(x, k):
-        """
-        :param x:
-        :return:
-        """
         return k * x - 2 * nn.functional.softplus(k * x) + math.log(k)
 
 

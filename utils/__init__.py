@@ -27,32 +27,31 @@ def make_parser():
     parser.add_argument("--encoder_x", type=str, default="NN")
     parser.add_argument("--encoder_c", type=str, default="NN")
     parser.add_argument("--encoder_y", type=str, default="NN")
-    parser.add_argument("--full_cov_prior", action="store_true", default=False)
+    parser.add_argument("--full_cov_prior", action="store_true", default=False)  # Use full covariance gaussian priors
 
     # Data, training and validation
-    parser.add_argument("--n_iter", type=int, default=20_000)
-    parser.add_argument("--n_train", type=int, default=1024)
-    parser.add_argument("--n_val", type=int, default=512)
-    parser.add_argument("--n_test", type=int, default=512)
-    parser.add_argument("--n_ood", type=int, default=512)
-    parser.add_argument("--n_batch", type=int, default=64)
-    parser.add_argument("--n_mc_train", type=int, default=16)
-    parser.add_argument("--n_mc_val", type=int, default=64)
-    parser.add_argument("--n_mc_test", type=int, default=512)
+    parser.add_argument("--n_iter", type=int, default=20_000)                      # Number of training iterations
+    parser.add_argument("--n_train", type=int, default=1024)                    # Size of training dataset
+    parser.add_argument("--n_val", type=int, default=512)                       # Size of validation dataset
+    parser.add_argument("--n_test", type=int, default=512)                      # Size of test dataset
+    parser.add_argument("--n_batch", type=int, default=64)                      # Batch size
+    parser.add_argument("--n_mc_train", type=int, default=16)                   # No. of MC samples for training
+    parser.add_argument("--n_mc_val", type=int, default=64)                     # No. of MC samples for validation
+    parser.add_argument("--n_mc_test", type=int, default=512)                   # No. of MC samples for testing
     parser.add_argument("--val_freq", type=int, default=10)
 
     # Disentanglement
-    parser.add_argument("--lambda_g0", type=float, default=1/256)
-    parser.add_argument("--beta_x0", type=float, default=1.0)
+    parser.add_argument("--lambda_g0", type=float, default=1/256)               # Gradient reversal hyperparameter
+    parser.add_argument("--beta_x0", type=float, default=1.0)                   # KL-divergence scaling factors (not tested)
     parser.add_argument("--beta_c0", type=float, default=1.0)
     parser.add_argument("--beta_y0", type=float, default=1.0)
-    parser.add_argument("--lambda_x", type=float, default=None)
-    parser.add_argument("--alpha_x", type=float, default=1.0)
+    parser.add_argument("--lambda_x", type=float, default=None)                 # Constraint on data-driven decoder mean output magnitude (not tested)
+    parser.add_argument("--alpha_x", type=float, default=1.0)                   # Log-likelihood scaling factors (not tested)
     parser.add_argument("--alpha_c", type=float, default=1.0)
     parser.add_argument("--alpha_y", type=float, default=1.0)
 
     # Optimization
-    parser.add_argument("--lr", type=float, default=1e-3)
+    parser.add_argument("--lr", type=float, default=1e-3)                       # Learning rates
     parser.add_argument("--lr_e", type=float, default=1e-3)
     parser.add_argument("--lr_ex", type=float, default=1e-3)
     parser.add_argument("--lr_ec", type=float, default=1e-3)
@@ -62,16 +61,16 @@ def make_parser():
     parser.add_argument("--lr_dc", type=float, default=1e-3)
     parser.add_argument("--lr_dy", type=float, default=1e-3)
     parser.add_argument("--lr_sigma", type=float, default=5e-3)
-    parser.add_argument("--wd_e", type=float, default=0.0)
+    parser.add_argument("--wd_e", type=float, default=0.0)                      # Weight decay (not tested)
     parser.add_argument("--wd_p", type=float, default=0.0)
     parser.add_argument("--wd_dx", type=float, default=0.0)
     parser.add_argument("--wd_dc", type=float, default=0.0)
     parser.add_argument("--wd_dy", type=float, default=0.0)
     parser.add_argument("--wd_sigma", type=float, default=0.0)
-    parser.add_argument("--clip_gradients", action="store_true", default=False)
+    parser.add_argument("--clip_gradients", action="store_true", default=False) # Gradient clipping (not tested)
     parser.add_argument("--max_grad_norm", type=float, default=1.0)
-    parser.add_argument("--patience", type=int, default=200) # Note: epochs to wait = patience * val_freq
-    parser.add_argument("--min_delta", type=float, default=0.001)
+    parser.add_argument("--patience", type=int, default=200)                    # Early stopping iterations to wait = patience * val_freq
+    parser.add_argument("--min_delta", type=float, default=0.001)               # Minimum change in objective for early stopping
 
     # Annealing
     parser.add_argument(
